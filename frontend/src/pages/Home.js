@@ -1,7 +1,26 @@
+import React from 'react'
 import logo from '../logo.svg';
 import '../App.css';
 
 const HomePage = () => {
+
+  React.useEffect(() => {
+    console.log('HomePage')
+    console.log(window.document.cookie)
+
+    fetchApi()
+
+    async function fetchApi() {
+      const res = await fetch("http://localhost:3001/f2e/get-cookies",{
+        mode: 'same-origin',
+        redirect: 'follow',
+        credentials: 'include'
+      }).then(res => res.json())
+
+      console.log(res)
+    }
+  }, [])
+
   return (
     <div className="App">
     <header className="App-header">
