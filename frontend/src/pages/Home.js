@@ -11,7 +11,11 @@ const HomePage = () => {
     fetchApi()
 
     async function fetchApi() {
-      const res = await fetch("http://localhost:3000/api").then(res => res.json())
+      const res = await fetch("http://localhost:3001/f2e/get-cookies",{
+        mode: 'same-origin',
+        redirect: 'follow',
+        credentials: 'include'
+      }).then(res => res.json())
 
       console.log(res)
     }
