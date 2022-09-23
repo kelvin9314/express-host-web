@@ -1,4 +1,5 @@
 const express = require('express')
+const jwt_decode = require('jwt-decode');
 const dotenv = require('dotenv');
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
@@ -31,43 +32,81 @@ app.post('/api/post', (req, res) =>{
 
 })
 
-app.get('/f2e/get-cookies', (req, res, next) => {
-  console.log(req.cookies);
-  // true
-
-  res.json(req.cookies);
-});
-
 // NOTE: multipart/form-data
 app.post('/f2e/Login',upload.array(),  (req, res) => {
   let formData = req.body;
   console.log('form data', formData);
 
-  const minute = 60 * 5
-  // if (formData?.token) res.cookie('token', formData?.token, { maxAge: minute });
+  if (!formData?.token){
+    res.redirect('/home')
+    return
+  }
 
-  // res.append('Set-Cookie', 'foo=bar; Path=/;')
-  // res.append('Set-Cookie', `token=${formData?.token} Path=/home;`)
-  res.append('Set-Cookie', `token=${formData?.token}`)
-  // res.cookie('token', `token=${formData?.token}`, { maxAge: minute, httpOnly : false});
-  // res.setHeader('Set-Cookie', `token=${formData?.token}`)
+  try {
+    const decoded = jwt_decode(formData?.token)
+    console.log('decoded')
+    console.log(decoded)
+
+    const isTokenExpired = new Date(decoded.exp * 1000) < new Date()
+    console.log(isTokenExpired)
+    if (isTokenExpired || !decoded?.account || !decoded?.lang || !decoded?.uid) {
+      res.redirect('/home')
+    }
+    // const diffInMins = Math.floor(Math.abs(decoded.exp * 1000 - new Date().getTime()) / (1000 * 60))
+    const diffInMins = 1
+
+    res.append('Set-Cookie', `token=${formData.token}`,{ expires: diffInMins, maxAge: diffInMins })
+
+    res.redirect('/home?needToCall=1')
+    //  res.cookie('token', formData?.token, { expires: diffInMins});
+  } catch (err) {
+    console.log(err?.message)
+    res.redirect('/home')
+
+  }
 
 
-  // if(formData?.type === 'home'){
-  //   res.redirect("/home")
-  // }
-
-  // if(formData?.type === '404'){
-  //   res.redirect("/home")
-  // }
-
-
-  res.redirect('/home')
-  // res.send('Your are logged in');
-
-  // return res.redirect(`/404`)
-  // res.redirect(`/home?t=${formData?.token}`)
 })
+
+app.get('/f2e/get-cookies', (req, res, next) => {
+  console.log(req)
+  console.log(req.cookies);
+  const token = req.cookies?.token
+  if(!token) {
+    res.clearCookie()
+    res.end()
+    return
+  }
+
+  try {
+    const decoded = jwt_decode(token)
+    console.log('decoded')
+    console.log(decoded)
+
+    const isTokenExpired = new Date(decoded.exp * 1000) < new Date()
+    if (isTokenExpired || !decoded?.account || !decoded?.lang || !decoded?.uid) {
+      // res.redirect('/home')
+      res.clearCookie()
+      res.end()
+    }
+
+  } catch (err) {
+    console.log(err?.message)
+  }
+
+  res.json({token });
+});
+
+app.get('/f2e/clear-cookies', (req, res, next) => {
+  console.log(req)
+
+  res.clearCookie()
+
+  res.json({
+    message: "ok"
+  })
+});
+
 
 
 app.get('*', function (req,res) {
