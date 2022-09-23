@@ -37,26 +37,34 @@ app.post('/f2e/Login',upload.array(),  (req, res) => {
   let formData = req.body;
   console.log('form data', formData);
 
-  if (formData?.token){
-    try {
-      const decoded = jwt_decode(formData?.token)
-      console.log('decoded')
-      console.log(decoded)
-
-      const isTokenExpired = new Date(decoded.exp * 1000) < new Date()
-      if (isTokenExpired || !decoded?.account || !decoded?.lang || !decoded?.uid) {
-        res.redirect('/home')
-      }
-      // const diffInMins = Math.floor(Math.abs(decoded.exp * 1000 - new Date().getTime()) / (1000 * 60))
-      const diffInMins = 1
-      res.append('Set-Cookie', `token=${formData.token}`,{ expires: diffInMins, maxAge: diffInMins })
-      //  res.cookie('token', formData?.token, { expires: diffInMins});
-    } catch (err) {
-      console.log(err?.message)
-    }
+  if (!formData?.token){
+    res.redirect('/home')
+    return
   }
 
-  res.redirect('/home?needToCall=1')
+  try {
+    const decoded = jwt_decode(formData?.token)
+    console.log('decoded')
+    console.log(decoded)
+
+    const isTokenExpired = new Date(decoded.exp * 1000) < new Date()
+    console.log(isTokenExpired)
+    if (isTokenExpired || !decoded?.account || !decoded?.lang || !decoded?.uid) {
+      res.redirect('/home')
+    }
+    // const diffInMins = Math.floor(Math.abs(decoded.exp * 1000 - new Date().getTime()) / (1000 * 60))
+    const diffInMins = 1
+
+    res.append('Set-Cookie', `token=${formData.token}`,{ expires: diffInMins, maxAge: diffInMins })
+
+    res.redirect('/home?needToCall=1')
+    //  res.cookie('token', formData?.token, { expires: diffInMins});
+  } catch (err) {
+    console.log(err?.message)
+    res.redirect('/home')
+
+  }
+
 
 })
 

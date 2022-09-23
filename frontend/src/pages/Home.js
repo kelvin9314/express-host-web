@@ -3,21 +3,27 @@ import logo from '../logo.svg';
 import '../App.css';
 import jwt_decode from 'jwt-decode'
 import useLocalStorage from '../hooks/use-local-storage'
-import { useParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+
 
 
 const HomePage = () => {
-  const { needToCall } = useParams();
+
+  let [searchParams, setSearchParams] = useSearchParams();
+
   const [token, setToken] = useLocalStorage('logt', '')
   const [account, setAccount] = React.useState('')
 
   React.useEffect(() => {
+    console.log(searchParams)
+    const needToCall = searchParams.get('needToCall')
     console.log(`needToCall: ${needToCall}`)
+    console.log(typeof needToCall)
 
-    if(needToCall) fetchApi()
+    if(needToCall === '1') fetchApi()
 
     async function fetchApi() {
-      const res = await fetch("http://localhost:3001/f2e/get-cookies",{
+      const res = await fetch("/f2e/get-cookies",{
         mode: 'same-origin',
         redirect: 'follow',
         credentials: 'include'
@@ -48,9 +54,11 @@ const HomePage = () => {
         setAccount('')
       }
 
+      // TODO 這邊再把 url 上的 query params 清空
+
 
     }
-  }, [needToCall])
+  }, [searchParams])
 
 
   // NOTE: 網頁已登入過，localStorage 有值
