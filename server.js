@@ -17,8 +17,17 @@ app.use(cookieParser());
 const path = require('path').join(__dirname, './frontend/build')
 app.use(express.static(path))
 
+// app.use(function(req, res, next) {
+//   res.header('Content-Type', 'application/json;charset=UTF-8')
+//   res.header('Access-Control-Allow-Credentials', true)
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'Origin, X-Requested-With, Content-Type, Accept'
+//   )
+//   next()
+// })
+
 app.get('/api', (req, res) => {
-  console.log(req.headers)
   res.status(200).send('Hello World, this is API route')
 })
 
@@ -53,12 +62,15 @@ app.post('/f2e/Login',upload.array(),  (req, res) => {
       res.redirect('/home')
     }
     // const diffInMins = Math.floor(Math.abs(decoded.exp * 1000 - new Date().getTime()) / (1000 * 60))
-    const diffInMins = 1
+    // const diffInMins = 1
+    // res.append('Set-Cookie', `token=${formData.token}`,{ expires: diffInMins, maxAge: diffInMins })
 
-    res.append('Set-Cookie', `token=${formData.token}`,{ expires: diffInMins, maxAge: diffInMins })
 
-    res.redirect('/home?needToCall=1')
-    //  res.cookie('token', formData?.token, { expires: diffInMins});
+    // FIXME 先寫死 logt 這個cookie 有效時間為 1 分鐘
+     res.cookie('logt', formData?.token, { expires: new Date(Date.now() + 60 * 1000)});
+      //  res.cookie('logt', formData?.token, { expires: new Date(decoded.exp * 1000)});
+
+    res.redirect('/home')
   } catch (err) {
     console.log(err?.message)
     res.redirect('/home')
@@ -68,44 +80,44 @@ app.post('/f2e/Login',upload.array(),  (req, res) => {
 
 })
 
-app.get('/f2e/get-cookies', (req, res, next) => {
-  console.log(req)
-  console.log(req.cookies);
-  const token = req.cookies?.token
-  if(!token) {
-    res.clearCookie()
-    res.end()
-    return
-  }
+// app.get('/f2e/get-cookies', (req, res, next) => {
+//   console.log(req)
+//   console.log(req.cookies);
+//   const token = req.cookies?.token
+//   if(!token) {
+//     res.clearCookie()
+//     res.end()
+//     return
+//   }
 
-  try {
-    const decoded = jwt_decode(token)
-    console.log('decoded')
-    console.log(decoded)
+//   try {
+//     const decoded = jwt_decode(token)
+//     console.log('decoded')
+//     console.log(decoded)
 
-    const isTokenExpired = new Date(decoded.exp * 1000) < new Date()
-    if (isTokenExpired || !decoded?.account || !decoded?.lang || !decoded?.uid) {
-      // res.redirect('/home')
-      res.clearCookie()
-      res.end()
-    }
+//     const isTokenExpired = new Date(decoded.exp * 1000) < new Date()
+//     if (isTokenExpired || !decoded?.account || !decoded?.lang || !decoded?.uid) {
+//       // res.redirect('/home')
+//       res.clearCookie()
+//       res.end()
+//     }
 
-  } catch (err) {
-    console.log(err?.message)
-  }
+//   } catch (err) {
+//     console.log(err?.message)
+//   }
 
-  res.json({token });
-});
+//   res.json({token });
+// });
 
-app.get('/f2e/clear-cookies', (req, res, next) => {
-  console.log(req)
+// app.get('/f2e/clear-cookies', (req, res, next) => {
+//   console.log(req)
 
-  res.clearCookie()
+//   res.clearCookie()
 
-  res.json({
-    message: "ok"
-  })
-});
+//   res.json({
+//     message: "ok"
+//   })
+// });
 
 
 
