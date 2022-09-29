@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  expressjs-server:
+    container_name: expressjs-server
+    build: .
+    restart: always
+    ports:
+      - 3330:3001
+    stdin_open: true
+    volumes:
+      - ./frontend/build:/app/frontend/build
+      # - ./images:/app/public/images
+      # - ./files:/app/public/files

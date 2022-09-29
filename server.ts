@@ -28,7 +28,9 @@ app.use(express.static(path))
 // })
 
 app.get('/api', (req: Request, res: Response) => {
-  res.status(200).send('Hello World, this is API route')
+  // res.status(200).send('Hello World, this is API route')
+  const msg = process.env.TEST_TEXT || 'Hello World, this is API route'
+  res.status(200).send(msg)
 })
 
 app.post('/api/post', (req: Request, res: Response) =>{

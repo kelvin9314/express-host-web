@@ -19,7 +19,8 @@ app.use(cookieParser());
 const path = require('path').join(__dirname, './frontend/build');
 app.use(express_1.default.static(path));
 app.get('/api', (req, res) => {
-    res.status(200).send('Hello World, this is API route');
+    const msg = process.env.TEST_TEXT || 'Hello World, this is API route';
+    res.status(200).send(msg);
 });
 app.post('/api/post', (req, res) => {
     console.log(req.body);
